@@ -144,6 +144,29 @@ async function run() {
             res.send(orders);
           });
 
+          app.delete('/allorder/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+
+            const result = await orderCollection.deleteOne(query);
+            res.send(result);
+        })
+
+          //shipment order
+          app.put('/ordershipment/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedOrder = req.body;
+            const filter = { _id: ObjectId(id) };
+            const updatedDoc = {
+                $set: {
+                    status: updatedOrder.shipment,
+                }
+            };
+            console.log(id, updatedDoc);
+            const result = await orderCollection.updateOne(filter, updatedDoc);
+            res.send(result);
+        })
+
 
         //payment collection
         app.get('/order/:id', async(req, res) => {
@@ -221,6 +244,21 @@ async function run() {
             const token = jwt.sign({email:email}, process.env.ACCESS_TOKEN, {expiresIn: '2h'})
             res.send({result, token});
         })
+
+        //review part
+        app.get('/review', async(req, res) => {
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+          })
+      
+         
+          app.post('/review', async(req, res) => {
+            const newReview = req.body;
+            const result = await reviewCollection.insertOne(newReview);
+            res.send(result);
+        });
 
 
     }
